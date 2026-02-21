@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@400;700&family=Creepster&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0rem;
+    
+    /* 2000s Neon + Pastel Palette */
+    --background: 0.98 0.05 280; /* soft lavender bg */
+    --foreground: 0.25 0.08 320; /* deep purple text */
+    
+    --card: 0.95 0.08 320; /* light purple card */
+    --card-foreground: 0.25 0.08 320;
+    
+    --popover: 0.92 0.12 350;
+    --popover-foreground: 0.25 0.08 320;
+    
+    /* Hot Pink Primary - signature 2000s color */
+    --primary: 0.65 0.25 340; /* hot pink */
+    --primary-foreground: 0.98 0.02 280;
+    
+    /* Lime Green Secondary */
+    --secondary: 0.85 0.22 130; /* lime green */
+    --secondary-foreground: 0.25 0.1 130;
+    
+    /* Cyan Accent */
+    --accent: 0.75 0.18 200; /* cyan */
+    --accent-foreground: 0.15 0.08 200;
+    
+    --muted: 0.88 0.05 280;
+    --muted-foreground: 0.55 0.06 280;
+    
+    --destructive: 0.60 0.25 25; /* orange-red */
+    --destructive-foreground: 0.98 0.02 25;
+    
+    --border: 0.65 0.18 340; /* hot pink borders */
+    --input: 0.90 0.08 320;
+    --ring: 0.65 0.25 340;
+    
+    /* Neon Rainbow Charts */
+    --chart-1: 0.65 0.25 340; /* hot pink */
+    --chart-2: 0.75 0.18 200; /* cyan */
+    --chart-3: 0.85 0.22 130; /* lime */
+    --chart-4: 0.75 0.20 80; /* yellow */
+    --chart-5: 0.70 0.22 300; /* magenta */
+    
+    --sidebar: 0.95 0.08 320;
+    --sidebar-foreground: 0.25 0.08 320;
+    --sidebar-primary: 0.65 0.25 340;
+    --sidebar-primary-foreground: 0.98 0.02 280;
+    --sidebar-accent: 0.88 0.10 320;
+    --sidebar-accent-foreground: 0.25 0.08 320;
+    --sidebar-border: 0.75 0.15 320;
+    --sidebar-ring: 0.65 0.25 340;
+  }
+
+  .dark {
+    /* Darker, moodier 2000s aesthetic for 18+ section */
+    --background: 0.15 0.08 280; /* deep purple bg */
+    --foreground: 0.95 0.08 300; /* light pink text */
+    
+    --card: 0.20 0.10 290;
+    --card-foreground: 0.95 0.08 300;
+    
+    --popover: 0.18 0.12 280;
+    --popover-foreground: 0.95 0.08 300;
+    
+    /* Brighter neon in dark mode */
+    --primary: 0.70 0.28 340; /* brighter hot pink */
+    --primary-foreground: 0.10 0.08 340;
+    
+    --secondary: 0.80 0.25 130; /* brighter lime */
+    --secondary-foreground: 0.15 0.1 130;
+    
+    --accent: 0.75 0.22 200; /* brighter cyan */
+    --accent-foreground: 0.10 0.08 200;
+    
+    --muted: 0.25 0.08 280;
+    --muted-foreground: 0.65 0.08 280;
+    
+    --destructive: 0.65 0.28 25;
+    --destructive-foreground: 0.10 0.05 25;
+    
+    --border: 0.35 0.15 340;
+    --input: 0.25 0.10 280;
+    --ring: 0.70 0.28 340;
+    
+    --chart-1: 0.70 0.28 340;
+    --chart-2: 0.75 0.22 200;
+    --chart-3: 0.80 0.25 130;
+    --chart-4: 0.75 0.25 80;
+    --chart-5: 0.72 0.25 300;
+    
+    --sidebar: 0.18 0.10 290;
+    --sidebar-foreground: 0.95 0.08 300;
+    --sidebar-primary: 0.70 0.28 340;
+    --sidebar-primary-foreground: 0.10 0.05 340;
+    --sidebar-accent: 0.25 0.12 280;
+    --sidebar-accent-foreground: 0.95 0.08 300;
+    --sidebar-border: 0.30 0.12 280;
+    --sidebar-ring: 0.70 0.28 340;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Comic Neue', cursive, sans-serif;
+  }
+  
+  h1, h2, h3 {
+    font-family: 'Press Start 2P', cursive, monospace;
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  /* 2000s Animations */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px) rotate(-1deg); }
+    75% { transform: translateX(2px) rotate(1deg); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 2px currentColor); }
+    50% { filter: drop-shadow(0 0 8px currentColor); }
+  }
+  
+  @keyframes bounce-in {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+  
+  .animate-shake {
+    animation: shake 0.3s ease-in-out;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .animate-bounce-in {
+    animation: bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .animate-sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+  
+  .hover-shake:hover {
+    animation: shake 0.3s ease-in-out;
+  }
+  
+  .hover-glow:hover {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  
+  /* Grunge textures */
+  .texture-grunge {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+  
+  /* Pixel-perfect borders */
+  .border-pixel {
+    border-style: solid;
+    border-width: 3px;
+    image-rendering: pixelated;
+  }
+  
+  /* Marquee scrolling */
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  .animate-marquee {
+    animation: marquee 20s linear infinite;
+  }
+}
