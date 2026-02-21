@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useRegisterUser, useCheckUsername } from "../hooks/useQueries";
-import { validatePassword, validateEmail, validateUsername } from "../lib/auth";
+import { validatePassword, validateUsername } from "../lib/auth";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,15 +17,14 @@ export function SignupPage() {
   const checkUsername = useCheckUsername();
 
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const passwordValidation = validatePassword(password);
   const usernameValidation = validateUsername(username);
-  const emailValid = validateEmail(email);
 
   const handleCheckUsername = async () => {
     if (!usernameValidation.valid || !username) return;
@@ -47,11 +46,6 @@ export function SignupPage() {
       return;
     }
 
-    if (!emailValid) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-
     if (!passwordValidation.valid) {
       toast.error("Password requirements not met");
       return;
@@ -62,47 +56,58 @@ export function SignupPage() {
       return;
     }
 
-    // First, login with Internet Identity
-    if (!identity) {
-      try {
-        await login();
-      } catch (error) {
-        toast.error("Failed to connect Internet Identity");
-        return;
-      }
+    if (usernameAvailable === false) {
+      toast.error("Username is already taken");
+      return;
     }
-  };
 
-  // Once logged in, register the user
-  const handleRegister = async () => {
-    if (!identity) return;
+    setIsRegistering(true);
 
     try {
-      const dob = new Date(dateOfBirth);
-      const dobTimestamp = BigInt(dob.getTime()) * BigInt(1_000_000);
-
-      await registerUser.mutateAsync({
-        username,
-        email,
-        dateOfBirth: dobTimestamp,
-        bio: "",
-        lastEmotion: "",
-        lastBodySensation: "",
-        isProfilePublic: true,
-      });
-
-      toast.success("Account created! Welcome to FEEL THE SLAP! 🎉");
-      navigate({ to: "/" });
+      // Login with Internet Identity first
+      await login();
     } catch (error) {
-      toast.error("Failed to create account");
+      toast.error("Failed to authenticate. Please try again.");
+      setIsRegistering(false);
       console.error(error);
     }
   };
 
   // Auto-register once identity is available
-  if (isLoginSuccess && identity && !registerUser.isSuccess) {
-    handleRegister();
-  }
+  useEffect(() => {
+    if (isLoginSuccess && identity && isRegistering && !registerUser.isSuccess) {
+      const performRegistration = async () => {
+        try {
+          const dob = new Date(dateOfBirth);
+          const dobTimestamp = BigInt(dob.getTime()) * BigInt(1_000_000);
+
+          await registerUser.mutateAsync({
+            username,
+            email: "", // Email is optional - will be added later via banner or settings
+            dateOfBirth: dobTimestamp,
+            bio: "",
+            lastEmotion: "",
+            lastBodySensation: "",
+            isProfilePublic: true,
+            isBanned: false,
+            stickerIds: [],
+          });
+
+          // Set flag for post-signup banner
+          localStorage.setItem("justSignedUp", "true");
+
+          toast.success("Account created! Welcome to FEEL THE SLAP! 🎉");
+          navigate({ to: "/" });
+        } catch (error) {
+          toast.error("Failed to create account. Please try again.");
+          console.error(error);
+          setIsRegistering(false);
+        }
+      };
+
+      performRegistration();
+    }
+  }, [isLoginSuccess, identity, isRegistering, registerUser.isSuccess]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 texture-grunge">
@@ -148,23 +153,6 @@ export function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-comic">
-              Email *
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border-2 border-primary font-comic"
-              placeholder="you@example.com"
-            />
-            {email && !emailValid && (
-              <p className="text-xs text-destructive font-comic">Invalid email format</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="password" className="font-comic">
               Password *
             </Label>
@@ -206,15 +194,14 @@ export function SignupPage() {
             onClick={handleSignup}
             disabled={
               !usernameValidation.valid ||
-              !emailValid ||
               !passwordValidation.valid ||
               !dateOfBirth ||
               usernameAvailable === false ||
-              registerUser.isPending
+              isRegistering
             }
             className="w-full font-comic text-lg py-6 hover-shake shadow-neon"
           >
-            {registerUser.isPending ? (
+            {isRegistering ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 Creating Account...

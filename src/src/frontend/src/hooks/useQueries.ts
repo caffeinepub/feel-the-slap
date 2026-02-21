@@ -242,3 +242,195 @@ export function useRemoveReaction() {
     },
   });
 }
+
+// Friendship Queries
+export function useGetFriends(userId: string | undefined) {
+  const { actor, isFetching } = useActor();
+  
+  return useQuery<string[]>({
+    queryKey: ["friends", userId],
+    queryFn: async () => {
+      if (!actor || !userId) return [];
+      return actor.getFriends(userId);
+    },
+    enabled: !!actor && !isFetching && !!userId,
+  });
+}
+
+export function useGetPendingFriendRequests() {
+  const { actor, isFetching } = useActor();
+  
+  return useQuery({
+    queryKey: ["pendingFriendRequests"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getPendingFriendRequests();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAreFriends(userId1: string | undefined, userId2: string | undefined) {
+  const { actor, isFetching } = useActor();
+  
+  return useQuery<boolean>({
+    queryKey: ["areFriends", userId1, userId2],
+    queryFn: async () => {
+      if (!actor || !userId1 || !userId2) return false;
+      return actor.areFriends(userId1, userId2);
+    },
+    enabled: !!actor && !isFetching && !!userId1 && !!userId2,
+  });
+}
+
+export function useSendFriendRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (toUserId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.sendFriendRequest(toUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["areFriends"] });
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
+  });
+}
+
+export function useAcceptFriendRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (fromUserId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.acceptFriendRequest(fromUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pendingFriendRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["areFriends"] });
+    },
+  });
+}
+
+export function useRejectFriendRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (fromUserId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.rejectFriendRequest(fromUserId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pendingFriendRequests"] });
+    },
+  });
+}
+
+export function useUnfriend() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.unfriend(userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["areFriends"] });
+    },
+  });
+}
+
+// Moderation Queries
+export function useIsSiteOwner() {
+  const { actor, isFetching } = useActor();
+  
+  return useQuery<boolean>({
+    queryKey: ["isSiteOwner"],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isSiteOwner();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetFlaggedPosts() {
+  const { actor, isFetching } = useActor();
+  
+  return useQuery<Post[]>({
+    queryKey: ["flaggedPosts"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getFlaggedPosts();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useFlagPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.flagPost(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["flaggedPosts"] });
+    },
+  });
+}
+
+export function useUnflagPost() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.unflagPost(postId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["flaggedPosts"] });
+    },
+  });
+}
+
+export function useBanUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.banUser(userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    },
+  });
+}
+
+export function useUnbanUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.unbanUser(userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    },
+  });
+}

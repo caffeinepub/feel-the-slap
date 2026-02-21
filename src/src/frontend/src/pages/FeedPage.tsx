@@ -4,6 +4,7 @@ import { CreatePostForm } from "../components/CreatePostForm";
 import { PostCard } from "../components/PostCard";
 import { LeftSidebar } from "../components/LeftSidebar";
 import { RightSidebar } from "../components/RightSidebar";
+import { PostSignupBanner } from "../components/PostSignupBanner";
 import { Button } from "@/components/ui/button";
 import { Loader2, Shuffle } from "lucide-react";
 import { isOver18 } from "../lib/auth";
@@ -41,6 +42,7 @@ export function FeedPage() {
       <LeftSidebar />
 
       <main className="flex-1 container max-w-3xl mx-auto px-4 py-6 space-y-6">
+        {profile && <PostSignupBanner />}
         {profile && <CreatePostForm />}
 
         <div className="flex items-center justify-between">

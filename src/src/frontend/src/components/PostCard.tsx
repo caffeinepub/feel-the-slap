@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import type { Post } from "../backend";
-import { useGetComments, useCreateComment } from "../hooks/useQueries";
+import type { Post, PostVisibility } from "../backend";
+import { useGetComments, useCreateComment, useFlagPost } from "../hooks/useQueries";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { MessageCircle, Loader2 } from "lucide-react";
+import { MessageCircle, Loader2, Flag, Globe, Users, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { CommentList } from "./CommentList";
 
@@ -26,9 +26,35 @@ export function PostCard({ post }: PostCardProps) {
     showComments ? post.id : undefined
   );
   const createComment = useCreateComment();
+  const flagPost = useFlagPost();
 
   const displayName = post.isAnonymous ? "Anonymous User" : post.userId;
   const postDate = new Date(Number(post.timestamp) / 1_000_000);
+  const currentUserId = identity?.getPrincipal().toString();
+  const isOwnPost = currentUserId === post.userId;
+
+  const handleFlagPost = async () => {
+    try {
+      await flagPost.mutateAsync(post.id);
+      toast.success("Post flagged for review");
+    } catch (error) {
+      toast.error("Failed to flag post");
+      console.error(error);
+    }
+  };
+
+  const getVisibilityIcon = (visibility: PostVisibility) => {
+    switch (visibility) {
+      case "publicVisibility":
+        return <Globe className="w-4 h-4 text-muted-foreground" />;
+      case "friendsOnly":
+        return <Users className="w-4 h-4 text-muted-foreground" />;
+      case "privateAccess":
+        return <Lock className="w-4 h-4 text-muted-foreground" />;
+      default:
+        return <Globe className="w-4 h-4 text-muted-foreground" />;
+    }
+  };
 
   const handleSubmitComment = async () => {
     if (!commentContent.trim()) {
@@ -92,11 +118,14 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
           
-          {post.is18Plus && (
-            <Badge variant="destructive" className="font-pixel text-xs">
-              18+
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {getVisibilityIcon(post.visibility)}
+            {post.is18Plus && (
+              <Badge variant="destructive" className="font-pixel text-xs">
+                18+
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
 
@@ -140,6 +169,19 @@ export function PostCard({ post }: PostCardProps) {
               {emoji}
             </Button>
           ))}
+          
+          {!isOwnPost && currentUserId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="font-comic hover-shake"
+              onClick={handleFlagPost}
+              disabled={flagPost.isPending || post.isFlagged}
+            >
+              <Flag className="w-4 h-4 mr-1" />
+              {post.isFlagged ? "Flagged" : "Flag"}
+            </Button>
+          )}
           
           <Button
             variant="ghost"

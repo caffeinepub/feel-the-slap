@@ -1,66 +1,79 @@
-# FEEL THE SLAP.COM
+# Feel The Slap - Signup Fix & Email/Phone Optional
 
 ## Current State
-New project - no existing codebase.
+
+The signup flow currently:
+- Requires username, email, password, and date of birth
+- Uses Internet Identity for authentication (redirects to id.ai)
+- Shows "error" when users try to sign up
+- Email field is required in UserProfile backend type
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Complete social media platform** with nostalgic 2000s teen aesthetic
-- **User Authentication System**: signup with username/email/password, username availability validation, password strength requirements (8+ chars, 1 number, 1 special char), login/logout, forgot password flow
-- **Age Verification**: DOB capture during signup, 18+ content gating, age-based access control
-- **Posts System**: text/image posts, anonymous posting toggle, timestamps, inline comments with nested replies, reaction system (heart, slap, cry, fire, vibe), infinite scroll feed
-- **Emotional Tracking**: comprehensive emotion dropdowns organized by 17 categories (Calm/Centered, Joy/Excitement, Angry/Annoyed, etc.), body sensations dropdown with 50+ options
-- **Profile Pages**: username, avatar, mini bio, post history, mood tracker showing last emotion + body sensation, public/private toggle
-- **18+ Section**: darker aesthetic, age-restricted content, same full functionality as main feed
-- **Interactive Features**: "Random Slap" button, live reaction updates, dynamic comment loading, pop-up notifications, marquee banners
-- **Sidebar Widgets**: left (Your Notes, Top Slaps, Random Confessions), right (friends list, Mood Selector, post activity calendar)
-- **2000s Design Elements**: neon + pastel colors, grungy textures, pixel fonts, small doodles/gifs, 8-bit background music, hover animations on buttons/avatars
+- Post-signup dismissible banner that prompts for email and phone (for account recovery)
+- Phone number field in UserProfile (optional)
+- Email update functionality in profile settings
+- Phone number update functionality in profile settings
 
 ### Modify
-N/A - new project
+- Remove email field from signup form (username + password + DOB only)
+- Make email field optional in UserProfile backend type (Text → ?Text)
+- Fix signup error - ensure Internet Identity flow completes successfully
+- Keep users on-site during signup (minimize visible redirect to id.ai)
+- After successful signup, show dismissible banner prompting for email/phone with:
+  - Friendly warning about account recovery
+  - Form to add email and phone immediately
+  - "Add Later" button to dismiss
+  - "Save" button to update profile with email/phone
 
 ### Remove
-N/A - new project
+- Email requirement from initial signup
 
 ## Implementation Plan
 
 ### Backend
-1. **User Management**: user registration with username uniqueness check, email validation, password hashing, DOB storage for age verification, login/logout sessions, password reset tokens
-2. **Posts CRUD**: create posts (text/image, anonymous flag), read posts with pagination, update posts, delete posts, filter by age-appropriate content
-3. **Reactions System**: add/remove reactions (5 types), get reaction counts per post, track user reactions
-4. **Comments System**: create comments with nested replies, get comments for posts, delete comments
-5. **Emotion & Sensation Tracking**: store user's selected emotion and body sensation per post or profile update, retrieve mood history
-6. **Profile Management**: get user profile, update bio/avatar, set public/private visibility, get post history
-7. **Content Filtering**: age-based content filtering (18+ flag on posts), random post selection
-8. **Image Upload**: blob storage for avatars and post images
+1. Update UserProfile type:
+   - Change `email: Text` to `email: ?Text`
+   - Add `phoneNumber: ?Text` field
+2. Update site owner check to handle optional email field
+3. All other backend logic remains unchanged
 
 ### Frontend
-1. **Authentication Pages**: signup form with live validation (username availability, password strength, age verification), login form with error handling, forgot password flow
-2. **Main Layout**: header with FEEL THE SLAP logo (dripping/pixel 3D style), tagline, auth buttons; three-column layout (left sidebar, central feed, right sidebar); footer with links; marquee banner
-3. **Feed Page**: infinite scroll post cards, each showing username, timestamp, content, emotion/sensation tags, reaction buttons, inline comments, anonymous indicator
-4. **Post Creation**: form with text/image input, anonymous toggle, emotion dropdown (17 categories), body sensation dropdown (50+ options), submit validation
-5. **18+ Section**: separate route with darker theme, age gate check, same post functionality
-6. **Profile Pages**: display user info, mood tracker visualization, post history grid, edit profile modal, public/private toggle
-7. **Sidebar Widgets**: Your Notes (personal saved posts), Top Slaps (trending posts), Random Confessions, Friends List, Mood Selector (quick emotion picker), Activity Calendar (heatmap of post activity)
-8. **Interactions**: live reaction updates without page reload, nested comment threads, "Random Slap" button, pop-up notifications system
-9. **2000s Aesthetic**: custom CSS with neon/pastel color palette, grungy background textures, pixel/dripping fonts, decorative GIFs and doodles, hover animations (shake, glow, bounce), optional 8-bit background music player
-10. **Responsive Design**: mobile-friendly layout with collapsible sidebars
-11. **Error Handling**: inline error messages for all forms, empty post prevention, image size validation, age restriction warnings
+1. Fix SignupPage:
+   - Remove email field from form
+   - Keep username, password, date of birth
+   - Fix Internet Identity authentication flow
+   - Handle errors properly with clear messages
+   - After successful registration, redirect to feed with post-signup banner
 
-### Data Models
-- **User**: username, email, passwordHash, dateOfBirth, avatar, bio, isProfilePublic, lastEmotion, lastBodySensation, createdAt
-- **Post**: authorId, content, imageUrl, isAnonymous, emotion, bodySensation, is18Plus, createdAt, reactions (map of reactionType -> count), commentCount
-- **Comment**: postId, authorId, content, parentCommentId (for nesting), createdAt
-- **Reaction**: postId, userId, reactionType (heart/slap/cry/fire/vibe)
+2. Create PostSignupBanner component:
+   - Dismissible banner (appears once after first signup)
+   - Shows at top of feed page
+   - Contains:
+     - Warning text: "⚠️ Add your email and phone to recover your account if you forget your password!"
+     - Email input field (validated)
+     - Phone number input field (validated)
+     - "Save" button → updates profile
+     - "Add Later" button → dismisses banner (can add in settings later)
+   - 2000s aesthetic styling (matches site theme)
+   - Use localStorage to track if user has seen banner
+
+3. Update ProfilePage settings section:
+   - Add email field (if not already set)
+   - Add phone number field
+   - Allow users to update these fields anytime
+
+4. Fix authentication errors:
+   - Add better error handling for Internet Identity
+   - Show specific error messages for different failure cases
+   - Ensure signup completes without visible redirects
 
 ## UX Notes
-- **2000s Nostalgia**: maximize visual chaos with clashing fonts, animated GIFs, marquee text, neon borders, and grungy overlays
-- **Emotional Expression**: make emotion/sensation selection central to posting experience - prominent dropdowns with clear categories
-- **Age Safety**: strict age gating for 18+ content - verify DOB during signup, block under-18 users from seeing/creating adult content
-- **Anonymous Posting**: clear toggle for anonymity, show "Anonymous User" instead of username when enabled
-- **Live Interactions**: reactions and comments should update in real-time feel without requiring page refresh
-- **Error Feedback**: all validation errors appear inline near the relevant field with clear messaging
-- **Hover Delight**: buttons, avatars, and interactive elements should have playful hover effects (shake, glow, scale)
-- **Infinite Scroll**: seamless loading of more posts as user scrolls down feed
-- **Mobile Responsive**: maintain 2000s aesthetic while ensuring usability on mobile (collapsible sidebars, touch-friendly buttons)
+
+- Signup is now just 3 fields: username, password, date of birth
+- Internet Identity auth happens in background/popup (minimize disruption)
+- Post-signup banner is helpful but non-blocking
+- Users can dismiss and add email/phone later in settings
+- Clear error messages guide users if something fails
+- No jarring redirects to external id.ai site (use iframe/popup if possible)

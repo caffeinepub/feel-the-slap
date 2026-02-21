@@ -10,6 +10,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { EighteenPlusPage } from "./pages/EighteenPlusPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { AdminPanel } from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,12 @@ const profileRoute = createRoute({
   component: ProfilePage,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin",
+  component: AdminPanel,
+});
+
 // Create router
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -64,6 +71,7 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   eighteenPlusRoute,
   profileRoute,
+  adminRoute,
 ]);
 
 const router = createRouter({ routeTree });

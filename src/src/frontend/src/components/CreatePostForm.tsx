@@ -5,14 +5,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmotionPicker } from "./EmotionPicker";
 import { BodySensationPicker } from "./BodySensationPicker";
 import { useCreatePost, useGetCallerProfile } from "../hooks/useQueries";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { isOver18 } from "../lib/auth";
-import { Loader2, Image as ImageIcon } from "lucide-react";
+import { Loader2, Image as ImageIcon, Globe, Users, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { ExternalBlob } from "../backend";
+import { ExternalBlob, PostVisibility } from "../backend";
 
 interface CreatePostFormProps {
   defaultIs18Plus?: boolean;
@@ -30,6 +31,7 @@ export function CreatePostForm({ defaultIs18Plus = false }: CreatePostFormProps)
   const [is18Plus, setIs18Plus] = useState(defaultIs18Plus);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [visibility, setVisibility] = useState<string>("publicVisibility");
 
   const userIsOver18 = profile ? isOver18(new Date(Number(profile.dateOfBirth) / 1_000_000)) : false;
 
@@ -92,6 +94,8 @@ export function CreatePostForm({ defaultIs18Plus = false }: CreatePostFormProps)
         is18Plus,
         userId: identity.getPrincipal().toString(),
         imageUrl: imageBlob,
+        visibility: visibility as PostVisibility,
+        isFlagged: false,
       });
 
       // Reset form
@@ -102,6 +106,7 @@ export function CreatePostForm({ defaultIs18Plus = false }: CreatePostFormProps)
       setIs18Plus(defaultIs18Plus);
       setImageFile(null);
       setImagePreview(null);
+      setVisibility("publicVisibility");
 
       toast.success("Post created! 🎉");
     } catch (error) {
@@ -166,6 +171,37 @@ export function CreatePostForm({ defaultIs18Plus = false }: CreatePostFormProps)
         <div className="grid sm:grid-cols-2 gap-4">
           <EmotionPicker value={emotion} onChange={setEmotion} />
           <BodySensationPicker value={bodySensation} onChange={setBodySensation} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="visibility" className="font-comic">
+            Who can see this post?
+          </Label>
+          <Select value={visibility} onValueChange={setVisibility}>
+            <SelectTrigger className="border-2 border-accent font-comic">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="publicVisibility" className="font-comic">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  🌍 Public
+                </div>
+              </SelectItem>
+              <SelectItem value="friendsOnly" className="font-comic">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  👥 Friends Only
+                </div>
+              </SelectItem>
+              <SelectItem value="privateAccess" className="font-comic">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  🔒 Private
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex flex-wrap gap-4">

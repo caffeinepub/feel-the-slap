@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useIsSiteOwner } from "../hooks/useQueries";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Shield } from "lucide-react";
+import { FriendRequestsModal } from "./FriendRequestsModal";
 
 export function Header() {
   const { identity, isLoginSuccess, clear } = useInternetIdentity();
+  const { data: isSiteOwner = false } = useIsSiteOwner();
 
   return (
     <header className="border-b-4 border-primary bg-card texture-grunge sticky top-0 z-50 shadow-neon">
@@ -38,6 +41,15 @@ export function Header() {
                     Profile
                   </Button>
                 </Link>
+                <FriendRequestsModal />
+                {isSiteOwner && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="hover-shake font-comic">
+                      <Shield className="w-4 h-4 mr-1" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Button
                   onClick={clear}
                   variant="outline"

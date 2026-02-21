@@ -19,6 +19,14 @@ export interface Comment {
   'postId' : string,
 }
 export type ExternalBlob = Uint8Array;
+export interface Friendship {
+  'status' : FriendshipStatus,
+  'userId1' : string,
+  'userId2' : string,
+}
+export type FriendshipStatus = { 'pending' : null } |
+  { 'rejected' : null } |
+  { 'accepted' : null };
 export interface Post {
   'id' : string,
   'content' : string,
@@ -29,7 +37,13 @@ export interface Post {
   'bodySensation' : string,
   'imageUrl' : [] | [ExternalBlob],
   'timestamp' : Time,
+  'flaggedBy' : [] | [string],
+  'visibility' : PostVisibility,
+  'isFlagged' : boolean,
 }
+export type PostVisibility = { 'friendsOnly' : null } |
+  { 'publicVisibility' : null } |
+  { 'privateAccess' : null };
 export type ReactionType = { 'cry' : null } |
   { 'heart' : null } |
   { 'fire' : null } |
@@ -40,8 +54,11 @@ export interface UserProfile {
   'bio' : string,
   'username' : string,
   'dateOfBirth' : Time,
+  'banner' : [] | [ExternalBlob],
   'email' : string,
   'lastBodySensation' : string,
+  'isBanned' : boolean,
+  'stickerIds' : Array<string>,
   'isProfilePublic' : boolean,
   'lastEmotion' : string,
   'avatar' : [] | [ExternalBlob],
@@ -77,24 +94,39 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'acceptFriendRequest' : ActorMethod<[string], undefined>,
   'addReaction' : ActorMethod<[string, string, ReactionType], undefined>,
+  'areFriends' : ActorMethod<[string, string], boolean>,
+  'areUsersFriends' : ActorMethod<[string, string], boolean>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'banUser' : ActorMethod<[string], undefined>,
   'createComment' : ActorMethod<[Comment], undefined>,
   'createPost' : ActorMethod<[Post], undefined>,
   'deleteComment' : ActorMethod<[string], undefined>,
   'deletePost' : ActorMethod<[string], undefined>,
+  'flagPost' : ActorMethod<[string], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCommentsByPost' : ActorMethod<[string], Array<Comment>>,
+  'getFlaggedPosts' : ActorMethod<[], Array<Post>>,
+  'getFriends' : ActorMethod<[string], Array<string>>,
+  'getFriendsByUserId' : ActorMethod<[string], Array<string>>,
+  'getPendingFriendRequests' : ActorMethod<[], Array<Friendship>>,
   'getPost' : ActorMethod<[string], [] | [Post]>,
   'getPosts' : ActorMethod<[bigint, bigint], Array<Post>>,
   'getPostsByUser' : ActorMethod<[string, bigint, bigint], Array<Post>>,
   'getUserProfile' : ActorMethod<[string], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isSiteOwner' : ActorMethod<[], boolean>,
   'isUsernameAvailable' : ActorMethod<[string], boolean>,
   'registerUser' : ActorMethod<[UserProfile], undefined>,
+  'rejectFriendRequest' : ActorMethod<[string], undefined>,
   'removeReaction' : ActorMethod<[string, string, ReactionType], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'sendFriendRequest' : ActorMethod<[string], undefined>,
+  'unbanUser' : ActorMethod<[string], undefined>,
+  'unflagPost' : ActorMethod<[string], undefined>,
+  'unfriend' : ActorMethod<[string], undefined>,
   'updatePost' : ActorMethod<[Post], undefined>,
   'updateUserProfile' : ActorMethod<[UserProfile], undefined>,
 }
